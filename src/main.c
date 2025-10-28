@@ -1,3 +1,4 @@
+#include <SDL3/SDL_mouse.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -121,13 +122,18 @@ int main(void) {
         moving_point = is_control(event.button.x, event.button.y);
         break;
       case SDL_EVENT_MOUSE_BUTTON_UP:
-        if (moving_point > -1) {
-          Point new = {.x = event.button.x, .y = event.button.y};
-          control_pts[moving_point] = new;
-          moving_point = -1;
-        }
+        moving_point = -1;
         break;
       }
+    }
+
+    // move control points smoothly if they should be moved
+    if (moving_point > -1) {
+      float mouse_x;
+      float mouse_y;
+      SDL_GetMouseState(&mouse_x, &mouse_y);
+      Point new = {.x = mouse_x, .y = mouse_y};
+      control_pts[moving_point] = new;
     }
 
     // set drawing color to white
