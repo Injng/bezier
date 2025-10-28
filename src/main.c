@@ -6,6 +6,7 @@
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
+#include <string.h>
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
@@ -13,6 +14,7 @@
 #define INIT_WIDTH 1080
 #define INIT_HEIGHT 720
 #define POINT_SIZE 10
+#define RESOLVE_STEP 0.002
 #define pse()                                                                  \
   printf("Error: %s", SDL_GetError());                                         \
   code = 1;                                                                    \
@@ -32,6 +34,32 @@ bool draw_point(Point *pt, int size) {
   SDL_FRect rect = {
       .x = pt->x - length, .y = pt->y - length, .w = size, .h = size};
   return SDL_RenderFillRect(renderer, &rect);
+}
+
+Point interpolate(Point pt_a, Point pt_b, float t) {
+  float diff_x = pt_b.x - pt_a.x;
+  float diff_y = pt_b.y - pt_a.y;
+  Point middle = {.x = pt_a.x + diff_x * t, .y = pt_a.y + diff_y * t};
+  return middle;
+}
+
+Point resolve(Point *points, float t) {
+  // if there is only one point left, just return that point
+  if (arrlen(points) == 1) {
+    Point return_pt = points[0];
+    arrfree(points);
+    return return_pt;
+  }
+
+  // otherwise, interpolate between each of the other points
+  Point *next = NULL;
+  for (int i = 0; i < arrlen(points) - 1; i++) {
+    arrput(next, interpolate(points[i], points[i + 1], t));
+  }
+
+  Point result = resolve(next, t);
+  arrfree(points);
+  return result;
 }
 
 int main(void) {
@@ -96,6 +124,19 @@ int main(void) {
     // draw the control points
     for (int i = 0; i < arrlen(control_pts); i++) {
       if (!draw_point(&control_pts[i], POINT_SIZE)) {
+        pse();
+      }
+    }
+
+    // resolve the bezier curve
+    for (float i = RESOLVE_STEP; i < 1; i += RESOLVE_STEP) {
+      // make a copy of the control points
+      Point *control_copy = NULL;
+      for (int i = 0; i < arrlen(control_pts); i++) {
+        arrput(control_copy, control_pts[i]);
+      }
+      Point pt = resolve(control_copy, i);
+      if (!draw_point(&pt, POINT_SIZE)) {
         pse();
       }
     }
