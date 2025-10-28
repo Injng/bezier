@@ -7,6 +7,9 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
 
+#define STB_DS_IMPLEMENTATION
+#include "stb_ds.h"
+
 #define INIT_WIDTH 1080
 #define INIT_HEIGHT 720
 #define pse()                                                                  \
