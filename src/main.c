@@ -1,12 +1,14 @@
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
-#include <string.h>
 
 #define STB_DS_IMPLEMENTATION
 #include "stb_ds.h"
@@ -28,6 +30,17 @@ typedef struct Point {
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 Point *control_pts = NULL;
+
+int is_control(float click_x, float click_y) {
+  int length = POINT_SIZE / 2;
+  for (int i = 0; i < arrlen(control_pts); i++) {
+    if (fabsf(click_x - control_pts[i].x) <= length &&
+        fabsf(click_y - control_pts[i].y) <= length) {
+      return i;
+    }
+  }
+  return -1;
+}
 
 bool draw_point(Point *pt, int size) {
   int length = size / 2;
@@ -95,6 +108,7 @@ int main(void) {
 
   // event loop with quit event state
   bool quit = false;
+  int moving_point = -1;
   while (!quit) {
     // handle events by repeatedly polling from event queue
     SDL_Event event;
@@ -102,6 +116,16 @@ int main(void) {
       switch (event.type) {
       case SDL_EVENT_QUIT:
         quit = true;
+        break;
+      case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        moving_point = is_control(event.button.x, event.button.y);
+        break;
+      case SDL_EVENT_MOUSE_BUTTON_UP:
+        if (moving_point > -1) {
+          Point new = {.x = event.button.x, .y = event.button.y};
+          control_pts[moving_point] = new;
+          moving_point = -1;
+        }
         break;
       }
     }
