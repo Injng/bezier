@@ -1,0 +1,19 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-c",
+      "-pedantic",
+      "-Wall",
+      "-Wextra",
+      "-g",
+      "-fsanitize=address",
+      "-o",
+      "main.o",
+      "src/main.c"
+    ],
+    "directory": "/home/lnjng/Projects/dev/bezier",
+    "file": "/home/lnjng/Projects/dev/bezier/src/main.c",
+    "output": "/home/lnjng/Projects/dev/bezier/main.o"
+  }
+]
