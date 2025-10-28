@@ -119,7 +119,12 @@ int main(void) {
         quit = true;
         break;
       case SDL_EVENT_MOUSE_BUTTON_DOWN:
-        moving_point = is_control(event.button.x, event.button.y);
+        if (event.button.button == SDL_BUTTON_LEFT) {
+          moving_point = is_control(event.button.x, event.button.y);
+        } else if (event.button.button == SDL_BUTTON_RIGHT) {
+          Point new = {.x = event.button.x, .y = event.button.y};
+          arrins(control_pts, arrlen(control_pts) - 2, new);
+        }
         break;
       case SDL_EVENT_MOUSE_BUTTON_UP:
         moving_point = -1;
